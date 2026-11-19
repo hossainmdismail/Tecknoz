@@ -1,0 +1,8 @@
+/* Keep the exported mobile menu icon visible against the white header. */
+.header .plus-liner {
+    background-color: var(--_color---secondary, #121f4a);
+}
+
+html {
+    scroll-padding-top: 88px;
+}
