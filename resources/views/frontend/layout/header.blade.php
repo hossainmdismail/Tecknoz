@@ -8,22 +8,22 @@
               <a href="{{ route('home') }}" @if (request()->routeIs('home')) aria-current="page" @endif class="nav-link w-inline-block{{ request()->routeIs('home') ? ' w--current' : '' }}">
                 <div class="nav-link-text">Home</div>
               </a>
-              <a @include('frontend.layout.link-attributes', ['name' => 'about', 'homeSection' => 'about']) class="nav-link w-inline-block">
+              <a href="{{ route('about') }}" @if (request()->routeIs('about')) aria-current="page" @endif class="nav-link w-inline-block{{ request()->routeIs('about') ? ' w--current' : '' }}">
                 <div class="nav-link-text">About</div>
               </a>
-              <a @include('frontend.layout.link-attributes', ['name' => 'clients', 'homeSection' => 'clients']) class="nav-link w-inline-block">
+              <a href="{{ route('clients') }}" @if (request()->routeIs('clients')) aria-current="page" @endif class="nav-link w-inline-block{{ request()->routeIs('clients') ? ' w--current' : '' }}">
                 <div class="nav-link-text">Our Clients</div>
               </a>
-              <a @include('frontend.layout.link-attributes', ['name' => 'services', 'homeSection' => 'services']) class="nav-link w-inline-block">
+              <a href="{{ route('services') }}" @if (request()->routeIs('services')) aria-current="page" @endif class="nav-link w-inline-block{{ request()->routeIs('services', 'services.*') ? ' w--current' : '' }}">
                 <div class="nav-link-text">Services</div>
               </a>
-              <a @include('frontend.layout.link-attributes', ['name' => 'blogs', 'homeSection' => 'blogs']) class="nav-link w-inline-block">
+              <a href="{{ route('blogs') }}" @if (request()->routeIs('blogs')) aria-current="page" @endif class="nav-link w-inline-block{{ request()->routeIs('blogs', 'blogs.*') ? ' w--current' : '' }}">
                 <div class="nav-link-text">Blogs</div>
               </a>
-              <a @include('frontend.layout.link-attributes', ['name' => 'events']) class="nav-link w-inline-block">
+              <a href="{{ route('events') }}" @if (request()->routeIs('events')) aria-current="page" @endif class="nav-link w-inline-block{{ request()->routeIs('events') ? ' w--current' : '' }}">
                 <div class="nav-link-text">Events</div>
               </a>
-              <a @include('frontend.layout.link-attributes', ['name' => 'contact', 'homeSection' => 'contact']) class="nav-link w-inline-block">
+              <a href="{{ route('contact') }}" @if (request()->routeIs('contact')) aria-current="page" @endif class="nav-link w-inline-block{{ request()->routeIs('contact') ? ' w--current' : '' }}">
                 <div class="nav-link-text">Contact</div>
               </a>
             </div>

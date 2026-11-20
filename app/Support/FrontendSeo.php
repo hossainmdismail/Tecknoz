@@ -75,6 +75,10 @@ class FrontendSeo
 
     protected function generateSchema(?GlobalSetting $global, ?SeoPages $page): array
     {
+        $channels = collect($global?->contact_channels);
+        $phone = $channels->firstWhere('type', 'phone')['value'] ?? null;
+        $email = $channels->firstWhere('type', 'email')['value'] ?? null;
+
         $schemas = [];
 
         $schemas[] = array_filter([
@@ -84,10 +88,10 @@ class FrontendSeo
             'url' => config('app.url'),
             'logo' => $this->toAbsoluteUrl($global?->logo_url),
             'description' => $global?->company_short_description,
-            'contactPoint' => ($global?->contact_phone || $global?->contact_email) ? array_filter([
+            'contactPoint' => ($phone || $email) ? array_filter([
                 '@type' => 'ContactPoint',
-                'telephone' => $global?->contact_phone,
-                'email' => $global?->contact_email,
+                'telephone' => $phone,
+                'email' => $email,
                 'contactType' => 'customer service',
             ]) : null,
             'sameAs' => array_values(array_filter([

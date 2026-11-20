@@ -1291,12 +1291,12 @@ p {
   grid-template-rows: auto;
   grid-template-columns: 1fr 1fr;
   grid-auto-columns: 1fr;
-  display: flex;
+  display: grid;
 }
 
 .portfolio-card {
   width: 100%;
-  max-width: 700px;
+  max-width: auto;
   color: var(--_color---secondary);
   text-decoration: none;
 }
@@ -1310,7 +1310,8 @@ p {
   object-position: 50% 0%;
   border-radius: 22px;
   width: 100%;
-  height: 560px;
+  height: auto;
+  aspect-ratio: 2/1.8;
   overflow: hidden;
 }
 
@@ -2066,13 +2067,13 @@ p {
 
 .vertical-section {
   width: 100%;
-  height: 300vh;
+  height: auto;
   position: relative;
   overflow: clip;
 }
 
 .horizontal-screen {
-  width: 300vw;
+  width: 100%;
   display: flex;
   position: sticky;
   top: 80px;
@@ -3163,9 +3164,7 @@ p {
     margin-bottom: 30px;
   }
 
-  .vertical-section {
-    display: none;
-  }
+
 
   .project-content {
     grid-template-columns: 1fr 1fr;

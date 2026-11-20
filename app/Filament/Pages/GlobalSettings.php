@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Enums\ContactChannel;
 use App\Models\GlobalSetting;
 use Filament\Actions\Action;
 use Filament\Forms;
@@ -14,6 +15,7 @@ use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 
 class GlobalSettings extends Page implements Forms\Contracts\HasForms
@@ -92,46 +94,109 @@ class GlobalSettings extends Page implements Forms\Contracts\HasForms
 
                         Tab::make('Contact')
                             ->schema([
-                                Section::make('Contact Information')
+                                Section::make('Locations')
                                     ->schema([
-                                        Forms\Components\TextInput::make('contact_email')
-                                            ->label('Contact Email')
-                                            ->helperText('Primary public email shown across the website.')
-                                            ->email()
-                                            ->maxLength(150),
+                                        Forms\Components\Repeater::make('contact_locations')
+                                            ->hiddenLabel()
+                                            ->helperText('Locations appear in this order on the public site.')
+                                            ->addActionLabel('Add location')
+                                            ->defaultItems(0)
+                                            ->collapsible()
+                                            ->collapsed()
+                                            ->itemLabel(fn (array $state): ?string => $state['label'] ?? null)
+                                            ->schema([
+                                                Forms\Components\TextInput::make('label')
+                                                    ->label('City or display name')
+                                                    ->live(onBlur: true)
+                                                    ->required()
+                                                    ->maxLength(150),
 
-                                        Forms\Components\TextInput::make('contact_phone')
-                                            ->label('Contact Phone')
-                                            ->helperText('Main phone number displayed in contact sections.')
-                                            ->tel()
-                                            ->maxLength(50),
+                                                Forms\Components\TextInput::make('office_name')
+                                                    ->label('Office name')
+                                                    ->maxLength(150),
 
-                                        Forms\Components\TextInput::make('whatsapp_number')
-                                            ->label('WhatsApp Number')
-                                            ->helperText('WhatsApp contact number for messaging links.')
-                                            ->tel()
-                                            ->maxLength(50),
+                                                Forms\Components\Textarea::make('address')
+                                                    ->label('Full address')
+                                                    ->rows(2)
+                                                    ->maxLength(1000),
 
-                                        Forms\Components\Textarea::make('address')
-                                            ->label('Address')
-                                            ->helperText('Official business or office address.')
-                                            ->rows(3)
-                                            ->columnSpanFull(),
+                                                Forms\Components\TextInput::make('map_url')
+                                                    ->label('Map URL')
+                                                    ->url()
+                                                    ->rule('url:http,https')
+                                                    ->maxLength(2048),
 
-                                        Forms\Components\TextInput::make('map_url')
-                                            ->label('Google Map URL')
-                                            ->helperText('Google Maps link for office location.')
-                                            ->url()
-                                            ->maxLength(1000)
-                                            ->columnSpanFull(),
+                                                Forms\Components\Textarea::make('map_embed_code')
+                                                    ->label('Map embed code')
+                                                    ->rows(2)
+                                                    ->columnSpanFull(),
+                                            ])
+                                            ->columns(2),
+                                    ]),
 
-                                        Forms\Components\Textarea::make('map_embed_code')
-                                            ->label('Map Embed Code')
-                                            ->helperText('Optional iframe embed code for rendering map directly.')
-                                            ->rows(5)
-                                            ->columnSpanFull(),
-                                    ])
-                                    ->columns(2),
+                                Section::make('Contact channels')
+                                    ->schema([
+                                        Forms\Components\Repeater::make('contact_channels')
+                                            ->hiddenLabel()
+                                            ->helperText('The first Email appears in the footer. The first linked Phone, WhatsApp, WeChat and Messenger entry is used in the floating bar.')
+                                            ->addActionLabel('Add contact channel')
+                                            ->defaultItems(0)
+                                            ->collapsible()
+                                            ->collapsed()
+                                            ->itemLabel(fn (array $state): ?string => ($state['label'] ?? null)
+                                                ?: ContactChannel::tryFrom($state['type'] ?? '')?->label())
+                                            ->schema([
+                                                Forms\Components\Select::make('type')
+                                                    ->options(collect(ContactChannel::cases())
+                                                        ->mapWithKeys(fn (ContactChannel $channel): array => [$channel->value => $channel->label()])
+                                                        ->all())
+                                                    ->required()
+                                                    ->live(),
+
+                                                Forms\Components\TextInput::make('label')
+                                                    ->placeholder('e.g. Sales or UK office')
+                                                    ->live(onBlur: true)
+                                                    ->maxLength(150),
+
+                                                Forms\Components\TextInput::make('value')
+                                                    ->label(fn (Get $get): string => match ($get('type')) {
+                                                        'phone', 'whatsapp' => 'Number with country code',
+                                                        'email' => 'Email address',
+                                                        'wechat' => 'WeChat ID',
+                                                        'messenger' => 'Display name',
+                                                        default => 'Contact value',
+                                                    })
+                                                    ->tel(fn (Get $get): bool => in_array($get('type'), ['phone', 'whatsapp'], true))
+                                                    ->telRegex('/^\+?[0-9][0-9 ().-]{5,48}$/')
+                                                    ->email(fn (Get $get): bool => $get('type') === 'email')
+                                                    ->required()
+                                                    ->maxLength(150),
+
+                                                Forms\Components\TextInput::make('url')
+                                                    ->label(fn (Get $get): string => $get('type') === 'wechat' ? 'QR image or profile URL' : 'Messenger or Facebook URL')
+                                                    ->url()
+                                                    ->rule('url:http,https')
+                                                    ->maxLength(2048)
+                                                    ->visible(fn (Get $get): bool => in_array($get('type'), ['wechat', 'messenger'], true))
+                                                    ->required(fn (Get $get): bool => $get('type') === 'messenger'),
+
+                                                Forms\Components\FileUpload::make('qr_image')
+                                                    ->label('WeChat QR image')
+                                                    ->disk('public')
+                                                    ->directory('settings/contact')
+                                                    ->image()
+                                                    ->maxSize(4096)
+                                                    ->visible(fn (Get $get): bool => $get('type') === 'wechat')
+                                                    ->columnSpanFull(),
+                                            ])
+                                            ->columns(2),
+                                    ]),
+
+                                Section::make('Availability')
+                                    ->schema([
+                                        Forms\Components\TextInput::make('business_hours')
+                                            ->maxLength(255),
+                                    ]),
                             ]),
 
                         Tab::make('Social Links')

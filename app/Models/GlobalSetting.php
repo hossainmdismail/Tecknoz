@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\ContactChannel;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
 class GlobalSetting extends Model
@@ -13,7 +15,12 @@ class GlobalSetting extends Model
     {
         return self::unguarded(fn (): self => self::query()->firstOrCreate(
             ['id' => self::SETTINGS_ID],
-            ['site_name' => config('app.name')],
+            [
+                'site_name' => config('app.name'),
+                'contact_locations' => config('contact.locations'),
+                'contact_channels' => config('contact.channels'),
+                'business_hours' => config('contact.business_hours'),
+            ],
         ));
     }
 
@@ -24,12 +31,9 @@ class GlobalSetting extends Model
         'logo_path',
         'favicon_path',
 
-        'contact_email',
-        'contact_phone',
-        'whatsapp_number',
-        'address',
-        'map_url',
-        'map_embed_code',
+        'contact_locations',
+        'contact_channels',
+        'business_hours',
 
         'facebook_url',
         'linkedin_url',
@@ -48,6 +52,28 @@ class GlobalSetting extends Model
         'canonical_base_url',
         'default_robots_meta',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'contact_locations' => 'array',
+            'contact_channels' => 'array',
+        ];
+    }
+
+    public function contactLinks(): Collection
+    {
+        return collect($this->contact_channels)->map(function (array $entry): array {
+            $channel = ContactChannel::from($entry['type']);
+
+            return [
+                'type' => $channel->value,
+                'label' => $entry['label'] ?? $channel->label(),
+                'value' => $entry['value'],
+                'href' => $channel->href($entry),
+            ];
+        });
+    }
 
     public function getLogoUrlAttribute(): ?string
     {

@@ -2,7 +2,7 @@
 
 ## Project purpose and current scope
 
-Tecknoz is a reusable Laravel starter extracted from the shared admin setup in SiliconBari. The installed Composer lock uses Laravel 13.4.0, Filament 5.4.5, and Livewire 4.2.4. PHP 8.4 or later is required. The public site uses the supplied Tecknoz Webflow export. Only its homepage is wired at `/`, named `home`. Add the other pages and their content models as requested. SiliconBari supplied the shared admin structure.
+Tecknoz is a reusable Laravel starter extracted from the shared admin setup in SiliconBari. The installed Composer lock uses Laravel 13.4.0, Filament 5.4.5, and Livewire 4.2.4. PHP 8.4 or later is required. The public site uses the supplied Tecknoz Webflow export. The public routes and CMS modules are listed below. Add other theme pages and content models as requested. SiliconBari supplied the shared admin structure.
 
 The Filament panel ID and path are both `admin`. It provides login, profile editing, and the Visit Website, Account Overview, Content Overview, and Quick Actions widgets. Visit Website links to the named `home` route. Content Overview counts SEO entries and active entries. Quick Actions links to SEO and settings and manages the signed-in admin's other sessions when the database session driver is enabled. The panel takes its site name, logo, and favicon from Global Settings when supplied. Access is controlled by `User::canAccessPanel()` using `users.is_admin`.
 
@@ -28,6 +28,30 @@ php artisan serve
 | Settings and SEO admin | [Global Settings](../../app/Filament/Pages/GlobalSettings.php), [Marketing Settings](../../app/Filament/Pages/MarketingSettings.php), [SEO Pages resource](../../app/Filament/Resources/SeoPages/SeoPagesResource.php) |
 | Database and verification | [migrations](../../database/migrations), [DatabaseSeeder](../../database/seeders/DatabaseSeeder.php), [integration tests](../../tests/Feature/StarterSetupTest.php) |
 
+## Public routes and SEO keys
+
+| Public URL | Named route | View | SEO Pages key |
+| --- | --- | --- | --- |
+| `/` | `home` | `frontend.pages.home` | `home` |
+| `/about` | `about` | `frontend.pages.about` | `about` |
+| `/clients` | `clients` | `frontend.pages.clients` | `clients` |
+| `/service` | `services` | `frontend.pages.services.index` | `services` |
+| `/service/{slug}` | `services.show` | `frontend.pages.services.{slug}` | `service.{slug}` |
+| `/events` | `events` | `frontend.pages.events` | `events` |
+| `/projects` | `projects` | `frontend.pages.projects.index` | `projects` |
+| `/project/{slug}` | `projects.show` | `frontend.pages.projects.show` | `project.detail.{id}` |
+| `/blogs` | `blogs` | `frontend.pages.blogs.index` | `blogs` |
+| `/category/{slug}` | `blogs.category` | `frontend.pages.blogs.index` | `blog.category.{id}` |
+| `/post/{slug}` | `blogs.show` | `frontend.pages.blogs.show` | `blog.detail.{id}` |
+
+[About](../../resources/views/frontend/pages/about.blade.php) uses the Webflow page ID `6afec6de276a1505a6c603d1`, the local videos and team image, and the shared header, footer, and CTA. Edit About page copy in its Blade view and page metadata through the `about` SEO entry. The About values section uses the global site tagline when it is set. The main header links to the About route and highlights it on that page.
+
+[Our Clients](../../resources/views/frontend/pages/clients.blade.php) uses Webflow page ID `6afec6de276a1505a6c603dc`. Its industry list and testimonials come from the supplied template. The logo grid and homepage ticker share the enabled records managed in `/admin/brands`. Use the `clients` SEO entry to edit its page metadata.
+
+[Services](../../resources/views/frontend/pages/services) uses the export's seven service cards and detail templates. The router lists the supported slugs explicitly, including the exported `stuff-augmentation` slug. Homepage and footer service links use the named detail route. Detail templates scope their CSS to the service content wrapper.
+
+[Events](../../resources/views/frontend/pages/events.blade.php) uses the exported hero and the shared CTA. It shows an empty state because the export contains repeated blog placeholders in the event grid. Service and Events content is edited in Blade. The Blogs listing, category pages, and post details read the existing Filament Blog CMS.
+
 ## Database and admin ownership
 
 | Table or group | Purpose |
@@ -37,15 +61,41 @@ php artisan serve
 | `global_settings` | [GlobalSetting](../../app/Models/GlobalSetting.php) singleton at ID `1`. Edit in `/admin/global-settings`. |
 | `marketing_settings` | [MarketingSettings](../../app/Models/MarketingSettings.php) singleton at ID `1`. Edit in `/admin/marketing-settings`. |
 | `seo_pages` | [SeoPages](../../app/Models/SeoPages.php) records with unique `page_key`. Manage in `/admin/seo-pages`. |
+| `brands` | [Brand](../../app/Models/Brand.php) images and enabled status. Manage in `/admin/brands`. |
+| `projects` | [Project](../../app/Models/Project.php) content and publication status. Manage in `/admin/projects`. |
+| `blog_posts`, `blog_categories` | [BlogPost](../../app/Models/BlogPost.php) and [BlogCategory](../../app/Models/BlogCategory.php). Manage in `/admin/blog-posts` and `/admin/blog-categories`. |
+| `faqs` | [Faq](../../app/Models/Faq.php) questions, answers, order, and enabled status. Manage in `/admin/faqs`. |
 
 The database seeder initializes the singleton settings records and preserves saved edits on subsequent runs. A new install starts with an empty SEO Pages table and an empty users table. Tracking integrations default to off. Global branding and default Open Graph image files are stored under `settings/` on the `public` disk. Per-page Open Graph uploads use `seo-pages/` on that disk. Filament stores relative upload paths. Use the model accessors `logo_url`, `favicon_url`, `default_og_image_url`, and `og_image_url` when rendering files. Public delivery uses the `public/storage` link created by `php artisan storage:link`.
+
+## Homepage brands and local imports
+
+The homepage ticker reads enabled images from `/admin/brands`. Use `php artisan db:seed --class=BrandSeeder` to import the Webflow theme's original logos when setting up a new database.
+
+Webflow project and blog CSV imports were applied to the local database and public upload storage. When moving this content to another environment, transfer the database records and the associated files in `storage/app/public`. The repository migrations create project and blog tables. The imported records and media live in the runtime data.
+
+## Projects CMS
+
+Manage projects in [ProjectResource](../../app/Filament/Resources/Projects/ProjectResource.php) at `/admin/projects`. A project starts as a draft. Publishing sets `published_at`, which controls the public listing and detail routes. Published projects marked Featured appear on the homepage, with up to six shown. Project details and services use rich text, the cover and client logo use the public disk, and the detail template displays optional client, deadline, and industry values from the record.
+
+The public routes are named `projects` and `projects.show`. Use `projects` and `project.detail.{id}` as SEO Pages keys. The detail key uses the project ID to survive a slug edit. Project name, summary and cover provide the corresponding theme metadata fallbacks.
+
+## Blog CMS
+
+Manage posts in `/admin/blog-posts` and categories in `/admin/blog-categories`. A post starts as a draft. Publishing enables its listing and detail routes. Up to three published Featured posts appear on the homepage. The listing supports category pages at `/category/{slug}`. The detail page uses the main image, category, reading time, rich-text body, and related posts. Cards prefer the thumbnail and fall back to the main image.
+
+SEO Pages keys are `blogs`, `blog.category.{id}`, and `blog.detail.{id}`. The ID-based keys survive slug edits.
+
+## Homepage FAQs
+
+Manage the homepage accordion at `/admin/faqs`. Enabled entries are rendered in display order. Editors can change the order by dragging rows or editing the numeric value. The migration imports the five FAQs from the theme on initial setup.
 
 ## Tecknoz theme files and adding pages
 
 - The shared Blade files are `default.blade.php`, `header.blade.php`, `footer.blade.php`, and `cta.blade.php` in `resources/views/frontend/layout/`. Page views live in `resources/views/frontend/pages/`. Include the reusable CTA on pages that use it.
 - Keep the exported CSS, fonts, images, video and Webflow JavaScript under `public/frontend/`. Each new Webflow page should set `webflow_page` from its export's `data-wf-page` to preserve page-specific interactions. Pass exported local asset paths through Laravel's `asset()`. For `srcset`, generate a URL for each candidate and keep each width descriptor.
 - The navigation partial uses named routes when available and links to matching homepage sections for the current preview. Add future routes with names the shared links request or update the links in the same change. The existing names are `about`, `clients`, `services`, `services.show` with `slug`, `projects`, `blogs`, `events`, `contact`, `privacy-policy`, and `terms-of-service`.
-- The homepage content is the static theme export. The newsletter controls are display-only. The shared theme reads settings that already exist in the starter and falls back to the export's copy and assets.
+- Public pages use the Webflow theme. The homepage reads brands, FAQs, and published featured projects and posts from the database. The newsletter controls are display-only. The shared theme reads settings that already exist in the starter and falls back to the export's copy and assets.
 
 1. Inventory the theme's real public routes and templates. For each route, record its Laravel route name, Blade view, SEO key strategy, metadata source, and robots policy. Add content tables and Filament resources as the theme requires them.
 2. Extend `frontend.layout.default` for the shared HTML shell, header, footer, SEO, and marketing hooks. Keep the homepage route named `home`.
@@ -56,7 +106,7 @@ The database seeder initializes the singleton settings records and preserves sav
 ### Static page example
 
 ```php
-// routes/web.php, once the theme has an About page
+// routes/web.php
 Route::view('/about', 'frontend.pages.about')->name('about');
 ```
 
@@ -146,12 +196,18 @@ In either partial, use nullable access and render optional fields conditionally.
 | Setting group | Available fields |
 | --- | --- |
 | Branding | `site_name`, `site_tagline`, `company_short_description`, and the `logo_url` and `favicon_url` accessors |
-| Contact and location | `contact_email`, `contact_phone`, `whatsapp_number`, `address`, `map_url`, `map_embed_code` |
+| Contact and location | `contact_locations`, `contact_channels`, and `business_hours`. Use `contactLinks()` to get contact labels, values, and resolved links. |
 | Social profiles | `facebook_url`, `linkedin_url`, `twitter_url`, `youtube_url`, `instagram_url` |
 | Footer | `footer_text`, `copyright_text` |
 | Global SEO | `default_meta_title`, `default_meta_description`, `default_og_title`, `default_og_description`, `default_og_image_url` accessor, `canonical_base_url`, `default_robots_meta` |
 
 Render ordinary settings through escaped Blade output. If the theme needs an embedded map, prefer a supported embed component with a validated URL. Review any intentional raw HTML rendering, including the source and allowed markup.
+
+### Contact settings
+
+Use the **Contact** tab under **Global Settings** to add or reorder locations and contact channels. The footer uses the short location labels and optional map links. A location also stores an optional office name, full address, and map embed code for a future Contact page. The default entries come from the Tecknoz export. The migration carries forward values from the former single-value fields.
+
+The footer shows location labels and the first email address. The floating contact bar uses the first linked WhatsApp, WeChat, Phone, and Messenger entry in each group. WeChat supports an ID alone, a QR image or profile URL, or an uploaded QR image. An upload takes precedence over the URL. Organization structured data uses the first Phone and Email entries.
 
 ## How every page receives marketing settings
 

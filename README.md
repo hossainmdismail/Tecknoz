@@ -20,11 +20,15 @@ SQLite is the default for local development. To use MySQL, create an empty datab
 - **SEO Pages** manages per-page metadata, Open Graph, canonical overrides, robots directives, and JSON-LD through a unique page key.
 - **Marketing Settings** manages Google Tag Manager, GA4, Meta Pixel, TikTok Pixel, webmaster verification, and trusted admin-managed snippets for the head, body start, and body end.
 - **Dashboard** includes Visit Website, Account Overview, Content Overview, and Quick Actions with active session controls. Session controls use the database session driver.
-- **Database** includes users, password resets, sessions, cache, queues, global settings, marketing settings, and SEO pages. Seed data initializes the two settings records.
+- **Content** includes Brands, Projects, Blog Posts, Blog Categories, and FAQs. Seed data initializes the settings records, and the FAQ migration imports the original theme questions.
 
 ## Frontend theme
 
-The Tecknoz Webflow homepage is wired at `/`. Find the homepage in `resources/views/frontend/pages/home.blade.php`, the default layout, header, footer and CTA under `resources/views/frontend/layout/`, and the exported assets under `public/frontend/`.
+Public pages include the Webflow homepage, About, Our Clients, Services, Events, Projects, and Blogs. Find their views in `resources/views/frontend/pages/`, the default layout, header, footer and CTA under `resources/views/frontend/layout/`, and the exported assets under `public/frontend/`.
+
+Manage brand logos in `/admin/brands`. Enabled images appear in the homepage ticker and the Clients logo grid. To import the original theme logos into a fresh database, run `php artisan db:seed --class=BrandSeeder`.
+
+The [project context guide](docs/ai/PROJECT_CONTEXT.md) lists all public routes, SEO keys, CMS modules, and theme integration details.
 
 ## Add another theme page
 

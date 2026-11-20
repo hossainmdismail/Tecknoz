@@ -87,8 +87,13 @@
     <div class="w-layout-blockcontainer container w-container">
       <div data-w-id="829f538c-d5a5-c967-3acf-7794ea557e00" style="opacity:0" class="brand-wrapper">
         <div class="brand-title"><strong>Empowering businesses with integrated technology, engineering, AI, and talent solutions to <br>transform ideas into measurable growth.</strong></div>
+        @if ($brands->isNotEmpty())
         <div class="brand-logo-wrapper">
-          <div class="brand-logo-slide"><img loading="lazy" src="{{ asset('frontend/images/LLU_1LLU.avif') }}" alt="" class="partner-logo"><img loading="lazy" src="{{ asset('frontend/images/informedSO.svg') }}" alt="" class="partner-logo"><img sizes="(max-width: 767px) 100vw, (max-width: 991px) 728px, 768px" srcset="{{ asset('frontend/images/ghorerbazar-p-500.webp') }} 500w, {{ asset('frontend/images/ghorerbazar.webp') }} 768w" alt="" src="{{ asset('frontend/images/ghorerbazar.webp') }}" loading="lazy" class="partner-logo"><img loading="lazy" src="{{ asset('frontend/images/liquidTrees_1liquidTrees.avif') }}" alt="" class="partner-logo"><img sizes="(max-width: 767px) 100vw, (max-width: 991px) 728px, 940px" srcset="{{ asset('frontend/images/wrench-logo-2-p-500.jpg') }} 500w, {{ asset('frontend/images/wrench-logo-2-p-800.jpg') }} 800w, {{ asset('frontend/images/wrench-logo-2-p-1080.jpg') }} 1080w, {{ asset('frontend/images/wrench-logo-2-p-1600.jpg') }} 1600w, {{ asset('frontend/images/wrench-logo-2-p-2000.jpg') }} 2000w, {{ asset('frontend/images/wrench-logo-2.jpg') }} 2400w" alt="" src="{{ asset('frontend/images/wrench-logo-2.jpg') }}" loading="lazy" class="partner-logo"><img loading="lazy" src="{{ asset('frontend/images/meditriangle.png') }}" alt="" class="partner-logo"><img sizes="100vw" srcset="{{ asset('frontend/images/nirvar-p-500.png') }} 500w, {{ asset('frontend/images/nirvar-p-800.png') }} 800w, {{ asset('frontend/images/nirvar-p-1080.png') }} 1080w, {{ asset('frontend/images/nirvar-p-1600.png') }} 1600w, {{ asset('frontend/images/nirvar-p-2000.png') }} 2000w, {{ asset('frontend/images/nirvar-p-2600.png') }} 2600w, {{ asset('frontend/images/nirvar-p-3200.png') }} 3200w, {{ asset('frontend/images/nirvar.png') }} 6408w" alt="" src="{{ asset('frontend/images/nirvar.png') }}" loading="lazy" class="partner-logo"><img loading="lazy" src="{{ asset('frontend/images/Meta-DEsign-solutions-logo-mds.svg') }}" alt="" class="partner-logo md"><img loading="lazy" src="{{ asset('frontend/images/TestGorilla.svg') }}" alt="" class="partner-logo md"><img sizes="100vw" srcset="{{ asset('frontend/images/ecomdigital_1-p-500.png') }} 500w, {{ asset('frontend/images/ecomdigital_1ecomdigital.avif') }} 1563w" alt="" src="{{ asset('frontend/images/ecomdigital_1ecomdigital.avif') }}" loading="lazy" class="partner-logo md"><img loading="lazy" src="{{ asset('frontend/images/Levilane_1Levilane.avif') }}" alt="" class="partner-logo md"><img loading="lazy" src="{{ asset('frontend/images/devop1.svg') }}" alt="" class="partner-logo md"><img loading="lazy" src="{{ asset('frontend/images/mobil-bangladesh.svg') }}" alt="" class="partner-logo md"><img loading="lazy" src="{{ asset('frontend/images/Longwin---logo.png') }}" alt="" class="partner-logo"><img sizes="100vw" srcset="{{ asset('frontend/images/WechatIMG31432-p-500.jpg') }} 500w, {{ asset('frontend/images/WechatIMG31432-p-800.jpg') }} 800w, {{ asset('frontend/images/WechatIMG31432.jpg') }} 933w" alt="" src="{{ asset('frontend/images/WechatIMG31432.jpg') }}" loading="lazy" class="partner-logo"><img loading="lazy" src="{{ asset('frontend/images/NBR-logo.png') }}" alt="" class="partner-logo"><img loading="lazy" src="{{ asset('frontend/images/paraform.png') }}" alt="" class="partner-logo"><img loading="lazy" src="{{ asset('frontend/images/Caspia_Logo-black.svg') }}" alt="" class="partner-logo"><img loading="lazy" src="{{ asset('frontend/images/download-1.jpg') }}" alt="" class="partner-logo"><img loading="lazy" src="{{ asset('frontend/images/Best-Electronics-PNG.png') }}" alt="" class="partner-logo"><img loading="lazy" src="{{ asset('frontend/images/download-copy.png') }}" alt="" class="partner-logo md"><img loading="lazy" src="{{ asset('frontend/images/DEER-Chair---Nasir-Group-Logo.webp') }}" alt="" class="partner-logo md"><img loading="lazy" src="{{ asset('frontend/images/dhaka-mass-transit-company-limited-dmtcl-logo-DA9F1D1088-seeklogo.com.png') }}" alt="" class="partner-logo md"><img loading="lazy" src="{{ asset('frontend/images/cropped-New-logo-300x100-1.webp') }}" alt="" class="partner-logo md"><img loading="lazy" src="{{ asset('frontend/images/devop1.svg') }}" alt="" class="partner-logo md"><img loading="lazy" src="{{ asset('frontend/images/LLU_1LLU.avif') }}" alt="" class="partner-logo md"></div>
+          <div @class(['brand-logo-slide', 'brand-logo-slide--static' => $brands->count() < 8])>
+            @foreach ($brands as $brand)
+              <img loading="lazy" src="{{ $brand->image_url }}" alt="" class="partner-logo">
+            @endforeach
+          </div>
           <div class="w-embed">
             <style>
 @keyframes scroll {
@@ -107,6 +112,19 @@
 .brand-logo-slide {
   display: flex; /* ensures logos are in a row */
   animation: scroll 45s linear infinite;
+}
+.brand-logo-slide--static {
+  animation: none;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+@media (prefers-reduced-motion: reduce) {
+  .brand-logo-slide {
+    animation: none;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
 }
 /* Adjust scroll speed for smaller screens */
 @media (max-width: 1200px) {
@@ -127,6 +145,7 @@
 </style>
           </div>
         </div>
+        @endif
       </div>
     </div>
   </section>
@@ -492,81 +511,23 @@
       </div>
     </div>
   </section>
-  <section id="projects" class="vertical-section">
-    <div class="portfolio-header">
-      <h2 class="section-title">Proven Success <br>in <span class="italic"><em>Every Industry</em></span></h2>
-      <p class="section-subtitle">Our works highlight the dedication we bring to every client partnership.</p>
-    </div>
-    <div class="horizontal-screen">
-      <div class="portfolio-wrapper">
-        <div class="portfolio-content">
-          <a data-wf--portfolio-card--variant="base" data-w-id="9ce5067a-6106-9703-ee58-74249f3cffab" aria-disabled="true" class="portfolio-card w-inline-block">
-            <div class="portfolio-image-wrap portfolio-image"><img src="{{ asset('frontend/images/69175c986b9956d0e09f60ec_1.png') }}" loading="lazy" alt="" sizes="(max-width: 767px) 100vw, (max-width: 991px) 727px, 940px" srcset="{{ asset('frontend/images/69175c986b9956d0e09f60ec_1.png') }} 500w, {{ asset('frontend/images/69175c986b9956d0e09f60ec_1.png') }} 800w, {{ asset('frontend/images/69175c986b9956d0e09f60ec_1.png') }} 1056w" class="portfolio-image"></div>
-            <div class="portfolio-text-wrap">
-              <h3 class="portfolio-title">Capture leads using gated whitepapers and reports.</h3>
-              <div class="portfolio-icons w-embed"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewbox="0 0 24 24" fill="none">
-                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                </svg></div>
-            </div>
-          </a>
-          <a data-wf--portfolio-card--variant="base" data-w-id="9ce5067a-6106-9703-ee58-74249f3cffab" aria-disabled="true" class="portfolio-card w-inline-block">
-            <div class="portfolio-image-wrap portfolio-image"><img src="{{ asset('frontend/images/Waterfall-Bridge-min.jpg') }}" loading="lazy" alt="" sizes="(max-width: 767px) 100vw, (max-width: 991px) 727px, 940px" srcset="{{ asset('frontend/images/Waterfall-Bridge-min-p-500.jpg') }} 500w, {{ asset('frontend/images/Waterfall-Bridge-min-p-800.jpg') }} 800w, {{ asset('frontend/images/Waterfall-Bridge-min-p-1080.jpg') }} 1080w, {{ asset('frontend/images/Waterfall-Bridge-min-p-1600.jpg') }} 1600w, {{ asset('frontend/images/Waterfall-Bridge-min-p-2000.jpg') }} 2000w, {{ asset('frontend/images/Waterfall-Bridge-min-p-2600.jpg') }} 2600w, {{ asset('frontend/images/Waterfall-Bridge-min.jpg') }} 3992w" class="portfolio-image"></div>
-            <div class="portfolio-text-wrap">
-              <h3 class="portfolio-title">Capture leads using gated whitepapers and reports.</h3>
-              <div class="portfolio-icons w-embed"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewbox="0 0 24 24" fill="none">
-                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                </svg></div>
-            </div>
-          </a>
-          <a data-wf--portfolio-card--variant="base" data-w-id="9ce5067a-6106-9703-ee58-74249f3cffab" aria-disabled="true" class="portfolio-card w-inline-block">
-            <div class="portfolio-image-wrap portfolio-image"><img src="{{ asset('frontend/images/Waterfall-Bridge-min.jpg') }}" loading="lazy" alt="" sizes="(max-width: 767px) 100vw, (max-width: 991px) 727px, 940px" srcset="{{ asset('frontend/images/Waterfall-Bridge-min-p-500.jpg') }} 500w, {{ asset('frontend/images/Waterfall-Bridge-min-p-800.jpg') }} 800w, {{ asset('frontend/images/Waterfall-Bridge-min-p-1080.jpg') }} 1080w, {{ asset('frontend/images/Waterfall-Bridge-min-p-1600.jpg') }} 1600w, {{ asset('frontend/images/Waterfall-Bridge-min-p-2000.jpg') }} 2000w, {{ asset('frontend/images/Waterfall-Bridge-min-p-2600.jpg') }} 2600w, {{ asset('frontend/images/Waterfall-Bridge-min.jpg') }} 3992w" class="portfolio-image"></div>
-            <div class="portfolio-text-wrap">
-              <h3 class="portfolio-title">Capture leads using gated whitepapers and reports.</h3>
-              <div class="portfolio-icons w-embed"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewbox="0 0 24 24" fill="none">
-                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                </svg></div>
-            </div>
-          </a>
-          <a data-wf--portfolio-card--variant="base" data-w-id="9ce5067a-6106-9703-ee58-74249f3cffab" aria-disabled="true" class="portfolio-card w-inline-block">
-            <div class="portfolio-image-wrap portfolio-image"><img src="{{ asset('frontend/images/Waterfall-Bridge-min.jpg') }}" loading="lazy" alt="" sizes="(max-width: 767px) 100vw, (max-width: 991px) 727px, 940px" srcset="{{ asset('frontend/images/Waterfall-Bridge-min-p-500.jpg') }} 500w, {{ asset('frontend/images/Waterfall-Bridge-min-p-800.jpg') }} 800w, {{ asset('frontend/images/Waterfall-Bridge-min-p-1080.jpg') }} 1080w, {{ asset('frontend/images/Waterfall-Bridge-min-p-1600.jpg') }} 1600w, {{ asset('frontend/images/Waterfall-Bridge-min-p-2000.jpg') }} 2000w, {{ asset('frontend/images/Waterfall-Bridge-min-p-2600.jpg') }} 2600w, {{ asset('frontend/images/Waterfall-Bridge-min.jpg') }} 3992w" class="portfolio-image"></div>
-            <div class="portfolio-text-wrap">
-              <h3 class="portfolio-title">Capture leads using gated whitepapers and reports.</h3>
-              <div class="portfolio-icons w-embed"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewbox="0 0 24 24" fill="none">
-                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                </svg></div>
-            </div>
-          </a>
-          <a data-wf--portfolio-card--variant="base" data-w-id="9ce5067a-6106-9703-ee58-74249f3cffab" aria-disabled="true" class="portfolio-card w-inline-block">
-            <div class="portfolio-image-wrap portfolio-image"><img src="{{ asset('frontend/images/Waterfall-Bridge-min.jpg') }}" loading="lazy" alt="" sizes="(max-width: 767px) 100vw, (max-width: 991px) 727px, 940px" srcset="{{ asset('frontend/images/Waterfall-Bridge-min-p-500.jpg') }} 500w, {{ asset('frontend/images/Waterfall-Bridge-min-p-800.jpg') }} 800w, {{ asset('frontend/images/Waterfall-Bridge-min-p-1080.jpg') }} 1080w, {{ asset('frontend/images/Waterfall-Bridge-min-p-1600.jpg') }} 1600w, {{ asset('frontend/images/Waterfall-Bridge-min-p-2000.jpg') }} 2000w, {{ asset('frontend/images/Waterfall-Bridge-min-p-2600.jpg') }} 2600w, {{ asset('frontend/images/Waterfall-Bridge-min.jpg') }} 3992w" class="portfolio-image"></div>
-            <div class="portfolio-text-wrap">
-              <h3 class="portfolio-title">Capture leads using gated whitepapers and reports.</h3>
-              <div class="portfolio-icons w-embed"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewbox="0 0 24 24" fill="none">
-                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                </svg></div>
-            </div>
-          </a>
-          <a data-wf--portfolio-card--variant="base" data-w-id="9ce5067a-6106-9703-ee58-74249f3cffab" aria-disabled="true" class="portfolio-card w-inline-block">
-            <div class="portfolio-image-wrap portfolio-image"><img src="{{ asset('frontend/images/Waterfall-Bridge-min.jpg') }}" loading="lazy" alt="" sizes="(max-width: 767px) 100vw, (max-width: 991px) 727px, 940px" srcset="{{ asset('frontend/images/Waterfall-Bridge-min-p-500.jpg') }} 500w, {{ asset('frontend/images/Waterfall-Bridge-min-p-800.jpg') }} 800w, {{ asset('frontend/images/Waterfall-Bridge-min-p-1080.jpg') }} 1080w, {{ asset('frontend/images/Waterfall-Bridge-min-p-1600.jpg') }} 1600w, {{ asset('frontend/images/Waterfall-Bridge-min-p-2000.jpg') }} 2000w, {{ asset('frontend/images/Waterfall-Bridge-min-p-2600.jpg') }} 2600w, {{ asset('frontend/images/Waterfall-Bridge-min.jpg') }} 3992w" class="portfolio-image"></div>
-            <div class="portfolio-text-wrap">
-              <h3 class="portfolio-title">Capture leads using gated whitepapers and reports.</h3>
-              <div class="portfolio-icons w-embed"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewbox="0 0 24 24" fill="none">
-                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                </svg></div>
-            </div>
-          </a>
-          <a data-wf--portfolio-card--variant="base" data-w-id="9ce5067a-6106-9703-ee58-74249f3cffab" aria-disabled="true" class="portfolio-card w-inline-block">
-            <div class="portfolio-image-wrap portfolio-image"><img src="{{ asset('frontend/images/Waterfall-Bridge-min.jpg') }}" loading="lazy" alt="" sizes="(max-width: 767px) 100vw, (max-width: 991px) 727px, 940px" srcset="{{ asset('frontend/images/Waterfall-Bridge-min-p-500.jpg') }} 500w, {{ asset('frontend/images/Waterfall-Bridge-min-p-800.jpg') }} 800w, {{ asset('frontend/images/Waterfall-Bridge-min-p-1080.jpg') }} 1080w, {{ asset('frontend/images/Waterfall-Bridge-min-p-1600.jpg') }} 1600w, {{ asset('frontend/images/Waterfall-Bridge-min-p-2000.jpg') }} 2000w, {{ asset('frontend/images/Waterfall-Bridge-min-p-2600.jpg') }} 2600w, {{ asset('frontend/images/Waterfall-Bridge-min.jpg') }} 3992w" class="portfolio-image"></div>
-            <div class="portfolio-text-wrap">
-              <h3 class="portfolio-title">Capture leads using gated whitepapers and reports.</h3>
-              <div class="portfolio-icons w-embed"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewbox="0 0 24 24" fill="none">
-                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                </svg></div>
-            </div>
-          </a>
+  @if ($featuredProjects->isNotEmpty())
+    <section id="projects">
+      <div class="portfolio-header">
+        <h2 class="section-title">Proven Success <br>in <span class="italic"><em>Every Industry</em></span></h2>
+        <p class="section-subtitle">Our works highlight the dedication we bring to every client partnership.</p>
+      </div>
+      <div class="container">
+        <div class="portfolio-wrapper">
+          <div class="portfolio-content">
+            @foreach ($featuredProjects as $project)
+              @include('frontend.pages.projects.card', ['project' => $project])
+            @endforeach
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
+  @endif
   <section class="section">
     <div class="w-layout-blockcontainer container w-container">
       <div class="testimonial-wrapper">
@@ -743,57 +704,30 @@
       </div>
     </div>
   </section>
-  <section class="section">
-    <div class="w-layout-blockcontainer container w-container">
-      <div class="faq-wrapper">
-        <div class="faq-header">
-          <h2 data-w-id="d498c131-e125-5ed8-dfa3-24e7d14e3e71" style="opacity:0" class="section-title">Your Questions<br><span class="italic"><em>Answered!</em></span></h2>
-        </div>
-        <div class="faq-content">
-          <div data-w-id="47732c4b-4c3a-4bd7-f065-d3999e000c02" class="faq-accordion-block">
-            <div data-w-id="47732c4b-4c3a-4bd7-f065-d3999e000c03" class="faq-quastion-wrap">
-              <h3 class="faq-question">How can I start a project with Tecknoz?</h3><img loading="lazy" src="{{ asset('frontend/images/faq-chevron.svg') }}" alt="icon" class="faq-arrow">
-            </div>
-            <div class="faq-answer-wrap">
-              <div class="faq-answer">Starting a project with us is simple. Just reach out through our contact form or email, and share a brief about your needs. We’ll schedule a call to understand your goals, discuss the scope, and recommend the right approach tailored to your product or brand.</div>
-            </div>
+  @if ($faqs->isNotEmpty())
+    <section class="section">
+      <div class="w-layout-blockcontainer container w-container">
+        <div class="faq-wrapper">
+          <div class="faq-header">
+            <h2 data-w-id="d498c131-e125-5ed8-dfa3-24e7d14e3e71" style="opacity:0" class="section-title">Your Questions<br><span class="italic"><em>Answered!</em></span></h2>
           </div>
-          <div data-w-id="47732c4b-4c3a-4bd7-f065-d3999e000c02" class="faq-accordion-block">
-            <div data-w-id="47732c4b-4c3a-4bd7-f065-d3999e000c03" class="faq-quastion-wrap">
-              <h3 class="faq-question">What makes Tecknoz different from other agencies?</h3><img loading="lazy" src="{{ asset('frontend/images/faq-chevron.svg') }}" alt="icon" class="faq-arrow">
-            </div>
-            <div class="faq-answer-wrap">
-              <div class="faq-answer">At Tecknoz, our team blends creativity, client-driven strategies, and industry expertise to deliver exceptional Software development solutions. We specialize in User Experience Design, App Design &amp; Development, and Web Design &amp; Development, SaaS Development, Ecommerce Development, AI Automation, Agentic AI, always maintaining a high standard of quality. Through a collaborative approach, we ensure our work align with your objectives, fostering growth and success for your brand. Our distinct process sets us apart from the competition.</div>
-            </div>
-          </div>
-          <div data-w-id="47732c4b-4c3a-4bd7-f065-d3999e000c02" class="faq-accordion-block">
-            <div data-w-id="47732c4b-4c3a-4bd7-f065-d3999e000c03" class="faq-quastion-wrap">
-              <h3 class="faq-question">Is Tecknoz a start-up-friendly agency?</h3><img loading="lazy" src="{{ asset('frontend/images/faq-chevron.svg') }}" alt="icon" class="faq-arrow">
-            </div>
-            <div class="faq-answer-wrap">
-              <div class="faq-answer">Tecknoz is an agency that caters to start-ups, offering affordable and flexible design solutions tailored to your budget and requirements. We understand the unique challenges start-ups face and are dedicated to helping you build a strong brand and a user-friendly digital presence from the ground up.</div>
-            </div>
-          </div>
-          <div data-w-id="47732c4b-4c3a-4bd7-f065-d3999e000c02" class="faq-accordion-block">
-            <div data-w-id="47732c4b-4c3a-4bd7-f065-d3999e000c03" class="faq-quastion-wrap">
-              <h3 class="faq-question">What development tools and technologies do we use to stay ahead in Software Development?</h3><img loading="lazy" src="{{ asset('frontend/images/faq-chevron.svg') }}" alt="icon" class="faq-arrow">
-            </div>
-            <div class="faq-answer-wrap">
-              <div class="faq-answer">We leverage advanced technologies such as Figma, Webflow, Shopify, React/Next, PHP/Node.js, AWS, Docker, and AI tools like TensorFlow, alongside agile methodologies, to deliver scalable, efficient, and innovative software solutions.</div>
-            </div>
-          </div>
-          <div data-w-id="47732c4b-4c3a-4bd7-f065-d3999e000c02" class="faq-accordion-block">
-            <div data-w-id="47732c4b-4c3a-4bd7-f065-d3999e000c03" class="faq-quastion-wrap">
-              <h3 class="faq-question">How do we handle project scope changes or unexpected challenges during the development process?</h3><img loading="lazy" src="{{ asset('frontend/images/faq-chevron.svg') }}" alt="icon" class="faq-arrow">
-            </div>
-            <div class="faq-answer-wrap">
-              <div class="faq-answer">Using Agile methodologies, we adapt quickly to scope changes and unforeseen challenges, ensuring transparent communication, flexibility, and continued focus on quality throughout the project.</div>
-            </div>
+          <div class="faq-content">
+            @foreach ($faqs as $faq)
+              <div data-w-id="47732c4b-4c3a-4bd7-f065-d3999e000c02" class="faq-accordion-block">
+                <div data-w-id="47732c4b-4c3a-4bd7-f065-d3999e000c03" class="faq-quastion-wrap">
+                  <h3 class="faq-question">{{ $faq->question }}</h3><img loading="lazy" src="{{ asset('frontend/images/faq-chevron.svg') }}" alt="" class="faq-arrow">
+                </div>
+                <div class="faq-answer-wrap">
+                  <div class="faq-answer">{{ $faq->answer }}</div>
+                </div>
+              </div>
+            @endforeach
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
+  @endif
+  @if ($featuredPosts->isNotEmpty())
   <section id="blogs" class="section">
     <div class="w-layout-blockcontainer container w-container">
       <div class="article-wrapper">
@@ -826,37 +760,14 @@
           </div>
         </div>
         <div class="article-content">
-          <a data-w-id="8a0f0c72-2ace-1b01-1571-97d1d98af2db" aria-disabled="true" class="blog-card w-inline-block">
-            <div class="blog-image-wrap"><img src="{{ asset('frontend/images/image-1.webp') }}" loading="lazy" alt="" sizes="(max-width: 767px) 100vw, (max-width: 991px) 728px, 940px" srcset="{{ asset('frontend/images/image-1-p-500.webp') }} 500w, {{ asset('frontend/images/image-1-p-800.webp') }} 800w, {{ asset('frontend/images/image-1-p-1080.webp') }} 1080w, {{ asset('frontend/images/image-1.webp') }} 1596w" class="blog-image"></div>
-            <div class="blog-text-block">
-              <div class="blog-date">
-                <div class="date">Design</div>
-              </div>
-              <div class="blog-title">How to get more leads from google ads</div>
-            </div>
-          </a>
-          <a data-w-id="8a0f0c72-2ace-1b01-1571-97d1d98af2db" aria-disabled="true" class="blog-card w-inline-block">
-            <div class="blog-image-wrap"><img src="{{ asset('frontend/images/image-1.webp') }}" loading="lazy" alt="" sizes="(max-width: 767px) 100vw, (max-width: 991px) 728px, 940px" srcset="{{ asset('frontend/images/image-1-p-500.webp') }} 500w, {{ asset('frontend/images/image-1-p-800.webp') }} 800w, {{ asset('frontend/images/image-1-p-1080.webp') }} 1080w, {{ asset('frontend/images/image-1.webp') }} 1596w" class="blog-image"></div>
-            <div class="blog-text-block">
-              <div class="blog-date">
-                <div class="date">Design</div>
-              </div>
-              <div class="blog-title">How to get more leads from google ads</div>
-            </div>
-          </a>
-          <a data-w-id="8a0f0c72-2ace-1b01-1571-97d1d98af2db" aria-disabled="true" class="blog-card w-inline-block">
-            <div class="blog-image-wrap"><img src="{{ asset('frontend/images/image-1.webp') }}" loading="lazy" alt="" sizes="(max-width: 767px) 100vw, (max-width: 991px) 728px, 940px" srcset="{{ asset('frontend/images/image-1-p-500.webp') }} 500w, {{ asset('frontend/images/image-1-p-800.webp') }} 800w, {{ asset('frontend/images/image-1-p-1080.webp') }} 1080w, {{ asset('frontend/images/image-1.webp') }} 1596w" class="blog-image"></div>
-            <div class="blog-text-block">
-              <div class="blog-date">
-                <div class="date">Design</div>
-              </div>
-              <div class="blog-title">How to get more leads from google ads</div>
-            </div>
-          </a>
+          @foreach ($featuredPosts as $post)
+            @include('frontend.pages.blogs.card', ['post' => $post])
+          @endforeach
         </div>
       </div>
     </div>
   </section>
+  @endif
 @endsection
 
 @section('after_content')
