@@ -279,3 +279,9 @@ html {
         flex-direction: column;
     }
 }
+
+@media (max-width: 991px) {
+    #contact-form {
+        grid-column: span 2;
+    }
+}

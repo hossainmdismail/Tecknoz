@@ -37,6 +37,8 @@ class ContactSubmissionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedInbox;
 
+    protected static string|\UnitEnum|null $navigationGroup = 'Data Collection';
+
     public static function form(Schema $schema): Schema
     {
         return $schema->components([

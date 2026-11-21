@@ -9,8 +9,11 @@ use App\Filament\Resources\BlogCategories\Pages\ManageBlogCategories;
 use App\Filament\Resources\BlogPosts\Pages\CreateBlogPost;
 use App\Filament\Resources\BlogPosts\Pages\EditBlogPost;
 use App\Filament\Resources\Brands\Pages\ManageBrands;
+use App\Filament\Resources\ContactLocations\Pages\ManageContactLocations;
 use App\Filament\Resources\ContactSubmissions\Pages\ManageContactSubmissions;
+use App\Filament\Resources\Events\Pages\ManageEvents;
 use App\Filament\Resources\Faqs\Pages\ManageFaqs;
+use App\Filament\Resources\NewsletterSubscriptions\Pages\ManageNewsletterSubscriptions;
 use App\Filament\Resources\Projects\Pages\CreateProject;
 use App\Filament\Resources\Projects\Pages\EditProject;
 use App\Filament\Resources\SeoPages\Pages\CreateSeoPages;
@@ -19,9 +22,12 @@ use App\Filament\Widgets\DashboardQuickLinks;
 use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use App\Models\Brand;
+use App\Models\ContactLocation;
 use App\Models\ContactSubmission;
+use App\Models\Event;
 use App\Models\Faq;
 use App\Models\GlobalSetting;
+use App\Models\NewsletterSubscription;
 use App\Models\Project;
 use App\Models\SeoPages;
 use App\Models\User;
@@ -60,14 +66,30 @@ class StarterSetupTest extends TestCase
             ->assertHasNoFormErrors()
             ->assertRedirect('/admin');
 
-        $this->get('/admin')
+        NewsletterSubscription::query()->create(['email' => 'recent@example.com']);
+        NewsletterSubscription::query()->create(['email' => 'older@example.com'])
+            ->forceFill(['created_at' => now()->subDays(31)])->save();
+
+        $dashboard = $this->get('/admin')
             ->assertOk()
             ->assertSee('Visit Website')
             ->assertSee('Test Admin')
             ->assertSee('Content Overview')
-            ->assertSee('Quick Actions');
+            ->assertSee('Quick Actions')
+            ->assertSee('0 new · 0 in progress')
+            ->assertSee('1 in the last 30 days')
+            ->assertSee('New Project')
+            ->assertSee('New Blog Post')
+            ->assertSee('New SEO Entry');
 
-        foreach (['profile', 'global-settings', 'marketing-settings', 'seo-pages', 'seo-pages/create'] as $path) {
+        $this->get('/admin/profile')->assertOk();
+
+        foreach ([
+            'projects', 'projects/create', 'blog-posts', 'blog-posts/create', 'blog-categories',
+            'brands', 'faqs', 'events', 'global-settings', 'marketing-settings', 'seo-pages', 'seo-pages/create',
+            'contact-locations', 'contact-submissions', 'newsletter-subscriptions',
+        ] as $path) {
+            $dashboard->assertSee('href="'.url("/admin/{$path}").'"', false);
             $this->get("/admin/{$path}")->assertOk();
         }
     }
@@ -162,10 +184,6 @@ class StarterSetupTest extends TestCase
 
         Livewire::test(GlobalSettings::class)
             ->fillForm([
-                'contact_locations' => [
-                    ['label' => 'Dhaka office', 'address' => 'Example address', 'map_url' => 'https://example.com/dhaka'],
-                    ['label' => 'London office'],
-                ],
                 'contact_channels' => [
                     ['type' => 'phone', 'label' => 'Main line', 'value' => '+880 1234-567890'],
                     ['type' => 'phone', 'label' => 'London line', 'value' => '+44 20 7946 0958'],
@@ -182,13 +200,10 @@ class StarterSetupTest extends TestCase
             ->assertHasNoFormErrors();
 
         $settings = GlobalSetting::query()->findOrFail(GlobalSetting::SETTINGS_ID);
-        $this->assertCount(2, $settings->contact_locations);
         $this->assertCount(8, $settings->contact_channels);
 
         $response = $this->get('/')
             ->assertOk()
-            ->assertSeeInOrder(['Dhaka office', 'London office'])
-            ->assertSee('https://example.com/dhaka')
             ->assertSee('tel:+8801234567890')
             ->assertSee('https://wa.me/8801234567891')
             ->assertSee('mailto:info@example.com')
@@ -212,17 +227,64 @@ class StarterSetupTest extends TestCase
         $this->assertStringNotContainsString('tel:+442079460958', $floatingBar);
         $this->assertStringNotContainsString('unlinked-wechat', $floatingBar);
 
+        $this->get('/contact')->assertSee('Monday to Friday');
+
         Livewire::test(GlobalSettings::class)
-            ->fillForm(['contact_locations' => [], 'contact_channels' => [], 'business_hours' => null])
+            ->fillForm(['contact_channels' => [], 'business_hours' => null])
             ->call('save')
             ->assertHasNoFormErrors();
 
         $this->seed();
-        $this->assertSame([], $settings->refresh()->contact_locations);
-        $this->assertSame([], $settings->contact_channels);
+        $this->assertSame([], $settings->refresh()->contact_channels);
 
         $this->app->forgetScopedInstances();
-        $this->get('/')->assertOk()->assertDontSee('class="contact-pop"', false)->assertDontSee('London office');
+        $this->get('/')->assertOk()->assertDontSee('class="contact-pop"', false);
+    }
+
+    public function test_contact_location_crud_updates_public_offices_and_footer(): void
+    {
+        $this->get('/admin/contact-locations')->assertRedirect('/admin/login');
+        $this->signInAdmin();
+        $this->get('/admin/contact-locations')->assertOk()->assertSee('Global Headquarters')->assertSee('Asia Innovation Hub');
+        $this->get('/admin/global-settings')->assertSee('Manage locations');
+
+        Livewire::test(ManageContactLocations::class)
+            ->callAction('create', [
+                'label' => 'Sydney, Australia',
+                'office_name' => 'Sydney Office',
+                'address' => '10 Example Street, Sydney',
+                'map_url' => 'https://example.com/sydney-map',
+                'sort_order' => 0,
+                'is_active' => true,
+            ])
+            ->assertHasNoActionErrors();
+        $office = ContactLocation::query()->where('label', 'Sydney, Australia')->sole();
+        $response = $this->get('/contact')
+            ->assertOk()
+            ->assertSee('10 Example Street, Sydney')
+            ->assertSee('https://example.com/sydney-map')
+            ->assertSee('https://www.google.com/maps/search/?api=1&amp;query=', false)
+            ->assertSee('Sydney, Australia');
+        $cards = str($response->getContent())->after('class="info-cards"')->before('</section>')->value();
+        $this->assertStringContainsString('Sydney Office', $cards);
+        $this->assertStringNotContainsString('Shenzhen, China', $cards);
+
+        Livewire::test(ManageContactLocations::class)
+            ->callAction(TestAction::make('edit')->table($office), [
+                'office_name' => 'Updated Sydney Office',
+                'sort_order' => 10,
+            ])
+            ->assertHasNoActionErrors();
+        $this->get('/contact')->assertSeeInOrder(['Global Headquarters', 'Updated Sydney Office']);
+
+        $office->refresh()->update(['is_active' => false]);
+        $this->get('/contact')->assertDontSee('Updated Sydney Office')->assertDontSee('Sydney, Australia');
+
+        Livewire::test(ManageContactLocations::class)
+            ->callAction(TestAction::make('delete')->table($office))
+            ->assertHasNoActionErrors();
+        $this->seed();
+        $this->assertModelMissing($office);
     }
 
     public function test_brand_crud_controls_which_images_appear_on_the_homepage(): void
@@ -576,8 +638,77 @@ class StarterSetupTest extends TestCase
         $this->get('/events')
             ->assertOk()
             ->assertSee('Event Highlights')
-            ->assertSee('No events to show yet.')
+            ->assertSee('Tecknoz founded')
+            ->assertSee('Expansion into AI and semiconductor engineering')
             ->assertDontSee('How to get more leads from google ads');
+    }
+
+    public function test_event_publication_and_launch_pages(): void
+    {
+        $this->signInAdmin();
+        Livewire::test(ManageEvents::class)
+            ->callAction('create', [
+                'title' => 'Test Technology Workshop',
+                'date_label' => 'December 2026',
+                'summary' => 'An event entered by the admin.',
+                'sort_order' => 0,
+                'is_active' => false,
+            ])
+            ->assertHasNoActionErrors();
+
+        $this->get('/events')->assertDontSee('Test Technology Workshop');
+        $event = Event::query()->where('title', 'Test Technology Workshop')->sole();
+        $event->update(['is_active' => true]);
+        $this->get('/events')->assertSeeInOrder(['Test Technology Workshop', 'Tecknoz founded']);
+
+        $home = $this->get('/');
+        foreach (config('industries') as $slug => $industry) {
+            $url = route('industries.show', $slug);
+            $home->assertSee('href="'.$url.'"', false);
+            $this->get($url)->assertOk()->assertSee($industry['name'])->assertSee('Related Services');
+        }
+        $this->get('/industry/unknown')->assertNotFound();
+        $this->get('/privacy-policy')->assertOk()->assertSee('<title>Privacy Policy | Tecknoz</title>', false);
+        $this->get('/terms-of-service')->assertOk()->assertSee('Project enquiries')->assertDontSee('Privacy requests');
+    }
+
+    public function test_sitemap_respects_publication_robots_and_canonical_settings(): void
+    {
+        GlobalSetting::currentOrCreate()->update(['canonical_base_url' => 'https://tecknoz.xyz']);
+        SeoPages::query()->create([
+            'page_name' => 'About',
+            'page_key' => 'about',
+            'robots_index' => false,
+        ]);
+        SeoPages::query()->create([
+            'page_name' => 'Clients',
+            'page_key' => 'clients',
+            'canonical_url' => 'https://tecknoz.xyz/about',
+        ]);
+        foreach (range(1, 9) as $number) {
+            Project::query()->create([
+                'name' => 'Featured item '.$number,
+                'slug' => 'featured-'.$number,
+                'is_published' => true,
+                'is_featured' => true,
+            ]);
+        }
+        Project::query()->create(['name' => 'Draft', 'slug' => 'draft', 'is_featured' => true]);
+
+        $home = $this->get('/')->assertSee('Featured item 9')->assertSee('Featured item 2')->assertDontSee('Featured item 1');
+        $home->assertDontSee(config('tecknoz.gtm_container_id'));
+        \App\Models\MarketingSettings::currentOrCreate()->update(['gtm_enabled' => true]);
+        $this->get('/')->assertSee(config('tecknoz.gtm_container_id'));
+
+        $this->get('/sitemap.xml')
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/xml; charset=UTF-8')
+            ->assertSee('<loc>https://tecknoz.xyz/project/featured-1</loc>', false)
+            ->assertSee('<loc>https://tecknoz.xyz/industry/real-estate</loc>', false)
+            ->assertDontSee('<loc>https://tecknoz.xyz/about</loc>', false)
+            ->assertDontSee('<loc>https://tecknoz.xyz/clients</loc>', false)
+            ->assertDontSee('/project/draft');
+        $this->get('/robots.txt')->assertOk()->assertSee('Sitemap: https://tecknoz.xyz/sitemap.xml');
     }
 
     public function test_contact_page_validates_and_saves_submissions(): void
@@ -666,6 +797,82 @@ class StarterSetupTest extends TestCase
             ->assertHasNoActionErrors();
         $this->assertSame(ContactSubmissionStatus::InProgress, $first->refresh()->status);
         $this->assertSame('Follow up tomorrow.', $first->internal_notes);
+    }
+
+    public function test_footer_validates_and_saves_each_newsletter_email_once(): void
+    {
+        $pageUrl = route('contact');
+        $formUrl = $pageUrl.'#newsletter-form';
+        $page = $this->get($pageUrl)
+            ->assertOk()
+            ->assertSee('action="'.route('newsletter.store').'"', false)
+            ->assertSee('name="newsletter_email"', false);
+        $sessionCookie = config('session.cookie');
+        $this->disableCookieEncryption()->withCookie($sessionCookie, $page->getCookie($sessionCookie, decrypt: false)->getValue());
+
+        $this->from($pageUrl)->post(route('newsletter.store'), ['newsletter_email' => ['invalid']])
+            ->assertRedirect($formUrl)
+            ->assertSessionHasErrorsIn('newsletter', ['newsletter_email']);
+        $this->get($pageUrl)->assertOk()->assertSee('id="newsletter-error"', false);
+        $this->assertDatabaseEmpty('newsletter_subscriptions');
+
+        $this->from($pageUrl)->post(route('newsletter.store'), [
+            'newsletter_email' => 'Reader@Example.com',
+            'status' => 'resolved',
+        ])->assertStatus(303)->assertRedirect($formUrl);
+        $this->get($pageUrl)->assertOk()->assertSee('Thanks for subscribing.');
+
+        $subscription = NewsletterSubscription::query()->sole();
+        $this->assertSame('reader@example.com', $subscription->email);
+        $this->assertSame(ContactSubmissionStatus::New, $subscription->status);
+        $subscription->update(['status' => ContactSubmissionStatus::Resolved, 'internal_notes' => 'Reviewed.']);
+
+        $this->from('https://example.org')->post(route('newsletter.store'), ['newsletter_email' => 'reader@example.com'])
+            ->assertStatus(303)
+            ->assertRedirect(route('home').'#newsletter-form');
+        $this->assertDatabaseCount('newsletter_subscriptions', 1);
+        $this->assertSame(ContactSubmissionStatus::Resolved, $subscription->refresh()->status);
+        $this->assertSame('Reviewed.', $subscription->internal_notes);
+        $this->assertDatabaseEmpty('contact_submissions');
+    }
+
+    public function test_newsletter_admin_groups_and_exports_submissions(): void
+    {
+        $this->get('/admin/newsletter-subscriptions')->assertRedirect('/admin/login');
+        $this->signInAdmin();
+        $this->get('/admin/newsletter-subscriptions')
+            ->assertOk()
+            ->assertSee('Data Collection')
+            ->assertSee('Contact Submissions')
+            ->assertSee('Newsletter Subscriptions');
+
+        $first = NewsletterSubscription::query()->create(['email' => 'zeta@example.com']);
+        $second = NewsletterSubscription::query()->create(['email' => 'alpha@example.com']);
+        $outside = NewsletterSubscription::query()->create(['email' => 'outside@example.com']);
+        $outside->forceFill(['created_at' => now()->subYear()])->save();
+
+        $page = Livewire::test(ManageNewsletterSubscriptions::class)
+            ->searchTable('example.com')
+            ->sortTable('email', 'asc')
+            ->filterTable('status', ContactSubmissionStatus::New)
+            ->filterTable('subscribed_at', ['from' => today()->toDateString(), 'until' => today()->toDateString()])
+            ->assertCanSeeTableRecords([$second, $first], inOrder: true)
+            ->assertCanNotSeeTableRecords([$outside])
+            ->callAction(TestAction::make('downloadCsv')->table())
+            ->assertFileDownloaded('newsletter-subscriptions.csv');
+        $csv = base64_decode($page->effects['download']['content']);
+        $this->assertStringContainsString($first->email, $csv);
+        $this->assertStringContainsString($second->email, $csv);
+        $this->assertStringNotContainsString($outside->email, $csv);
+        $this->assertLessThan(strpos($csv, $first->email), strpos($csv, $second->email));
+
+        $selected = Livewire::test(ManageNewsletterSubscriptions::class)
+            ->selectTableRecords([$first])
+            ->callAction(TestAction::make('downloadSelectedCsv')->table()->bulk())
+            ->assertFileDownloaded('selected-newsletter-subscriptions.csv');
+        $selectedCsv = base64_decode($selected->effects['download']['content']);
+        $this->assertStringContainsString($first->email, $selectedCsv);
+        $this->assertStringNotContainsString($second->email, $selectedCsv);
     }
 
     public function test_session_widget_revokes_only_other_sessions_for_the_signed_in_admin(): void

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreContactSubmissionRequest;
+use App\Models\ContactLocation;
 use App\Models\ContactSubmission;
 use App\Support\FrontendSeo;
 use Illuminate\Http\RedirectResponse;
@@ -15,6 +16,7 @@ class ContactController extends Controller
     {
         return view('frontend.pages.contact', [
             'budgetOptions' => ContactSubmission::BUDGET_OPTIONS,
+            'contactLocations' => ContactLocation::query()->visible()->get(),
             'settings' => $frontendSeo->globalSettings(),
         ]);
     }

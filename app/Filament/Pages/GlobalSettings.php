@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Enums\ContactChannel;
+use App\Filament\Resources\ContactLocations\ContactLocationResource;
 use App\Models\GlobalSetting;
 use Filament\Actions\Action;
 use Filament\Forms;
@@ -95,43 +96,11 @@ class GlobalSettings extends Page implements Forms\Contracts\HasForms
                         Tab::make('Contact')
                             ->schema([
                                 Section::make('Locations')
-                                    ->schema([
-                                        Forms\Components\Repeater::make('contact_locations')
-                                            ->hiddenLabel()
-                                            ->helperText('Locations appear in this order on the public site.')
-                                            ->addActionLabel('Add location')
-                                            ->defaultItems(0)
-                                            ->collapsible()
-                                            ->collapsed()
-                                            ->itemLabel(fn (array $state): ?string => $state['label'] ?? null)
-                                            ->schema([
-                                                Forms\Components\TextInput::make('label')
-                                                    ->label('City or display name')
-                                                    ->live(onBlur: true)
-                                                    ->required()
-                                                    ->maxLength(150),
-
-                                                Forms\Components\TextInput::make('office_name')
-                                                    ->label('Office name')
-                                                    ->maxLength(150),
-
-                                                Forms\Components\Textarea::make('address')
-                                                    ->label('Full address')
-                                                    ->rows(2)
-                                                    ->maxLength(1000),
-
-                                                Forms\Components\TextInput::make('map_url')
-                                                    ->label('Map URL')
-                                                    ->url()
-                                                    ->rule('url:http,https')
-                                                    ->maxLength(2048),
-
-                                                Forms\Components\Textarea::make('map_embed_code')
-                                                    ->label('Map embed code')
-                                                    ->rows(2)
-                                                    ->columnSpanFull(),
-                                            ])
-                                            ->columns(2),
+                                    ->description('Manage the locations shown on the Contact page and in the footer.')
+                                    ->headerActions([
+                                        Action::make('manageLocations')
+                                            ->label('Manage locations')
+                                            ->url(fn (): string => ContactLocationResource::getUrl()),
                                     ]),
 
                                 Section::make('Contact channels')
@@ -195,6 +164,7 @@ class GlobalSettings extends Page implements Forms\Contracts\HasForms
                                 Section::make('Availability')
                                     ->schema([
                                         Forms\Components\TextInput::make('business_hours')
+                                            ->helperText('Displayed in the Contact page’s Find Us section.')
                                             ->maxLength(255),
                                     ]),
                             ]),

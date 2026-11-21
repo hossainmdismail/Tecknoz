@@ -45,14 +45,8 @@ class FrontendSeo
         $twitterDescription = ($fallback['twitter_description'] ?? null) ?: $ogDescription;
         $twitterImage = $this->toAbsoluteUrl(($fallback['twitter_image'] ?? null) ?: $ogImage);
 
-        $canonical = $page?->canonical_url ?: $this->buildCanonicalUrl($global);
-
-        $robots = $page
-            ? implode(',', [
-                $page->robots_index ? 'index' : 'noindex',
-                $page->robots_follow ? 'follow' : 'nofollow',
-            ])
-            : ($global?->default_robots_meta ?: 'index,follow');
+        $canonical = $page?->canonical_url ?: $this->canonicalUrlForPath(request()->path());
+        $robots = $this->robotsFor($page);
 
         $schema = $this->generateSchema($global, $page);
 
@@ -85,7 +79,7 @@ class FrontendSeo
             '@context' => 'https://schema.org',
             '@type' => 'Organization',
             'name' => $global?->site_name ?: config('app.name'),
-            'url' => config('app.url'),
+            'url' => $this->canonicalBaseUrl(),
             'logo' => $this->toAbsoluteUrl($global?->logo_url),
             'description' => $global?->company_short_description,
             'contactPoint' => ($phone || $email) ? array_filter([
@@ -107,7 +101,7 @@ class FrontendSeo
             '@context' => 'https://schema.org',
             '@type' => 'WebSite',
             'name' => $global?->site_name ?: config('app.name'),
-            'url' => config('app.url'),
+            'url' => $this->canonicalBaseUrl(),
         ];
 
         if ($page?->schema_json) {
@@ -134,16 +128,26 @@ class FrontendSeo
             ->first();
     }
 
-    protected function buildCanonicalUrl(?GlobalSetting $global): string
+    public function canonicalBaseUrl(): string
     {
-        $baseUrl = rtrim($global?->canonical_base_url ?: config('app.url', url('/')), '/');
-        $path = request()->path();
+        return rtrim($this->globalSettings()?->canonical_base_url ?: (config('app.url') ?: url('/')), '/');
+    }
 
-        if ($path === '/') {
-            return $baseUrl;
-        }
+    public function canonicalUrlForPath(string $path): string
+    {
+        $path = trim($path, '/');
 
-        return $baseUrl.'/'.ltrim($path, '/');
+        return $this->canonicalBaseUrl().($path === '' ? '' : '/'.$path);
+    }
+
+    public function robotsFor(?SeoPages $page): string
+    {
+        return $page
+            ? implode(',', [
+                $page->robots_index ? 'index' : 'noindex',
+                $page->robots_follow ? 'follow' : 'nofollow',
+            ])
+            : ($this->globalSettings()?->default_robots_meta ?: 'index,follow');
     }
 
     protected function toAbsoluteUrl(?string $value): ?string

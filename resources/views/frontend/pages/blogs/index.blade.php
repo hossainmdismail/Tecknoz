@@ -3,7 +3,9 @@
 @section('webflow_page', $category ? '6afec6de276a1505a6c603d4' : '6afec6de276a1505a6c603d3')
 @section('seo_key', $category ? 'blog.category.' . $category->getKey() : 'blogs')
 @section('title', $category ? $category->name . ' | Tecknoz Blog' : 'Tecknoz Blog – Insights on Technology, Semiconductor Engineering & Business Growth')
-@section('description', $category?->description ?: 'Read insights on technology, engineering and business growth from Tecknoz.')
+@section('description', $category
+    ? ($category->description ?: 'Explore Tecknoz articles on '.$category->name.'.')
+    : 'Read insights on technology, engineering and business growth from Tecknoz.')
 
 @section('content')
   <section class="hero-section">

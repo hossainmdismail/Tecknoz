@@ -17,7 +17,6 @@ class GlobalSetting extends Model
             ['id' => self::SETTINGS_ID],
             [
                 'site_name' => config('app.name'),
-                'contact_locations' => config('contact.locations'),
                 'contact_channels' => config('contact.channels'),
                 'business_hours' => config('contact.business_hours'),
             ],
@@ -31,7 +30,6 @@ class GlobalSetting extends Model
         'logo_path',
         'favicon_path',
 
-        'contact_locations',
         'contact_channels',
         'business_hours',
 
@@ -56,7 +54,6 @@ class GlobalSetting extends Model
     protected function casts(): array
     {
         return [
-            'contact_locations' => 'array',
             'contact_channels' => 'array',
         ];
     }

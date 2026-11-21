@@ -4,9 +4,17 @@ namespace App\Filament\Widgets;
 
 use App\Filament\Pages\GlobalSettings;
 use App\Filament\Pages\MarketingSettings;
+use App\Filament\Resources\BlogCategories\BlogCategoryResource;
+use App\Filament\Resources\BlogPosts\BlogPostResource;
+use App\Filament\Resources\Brands\BrandResource;
+use App\Filament\Resources\ContactLocations\ContactLocationResource;
+use App\Filament\Resources\ContactSubmissions\ContactSubmissionResource;
+use App\Filament\Resources\Events\EventResource;
+use App\Filament\Resources\Faqs\FaqResource;
+use App\Filament\Resources\NewsletterSubscriptions\NewsletterSubscriptionResource;
+use App\Filament\Resources\Projects\ProjectResource;
 use App\Filament\Resources\SeoPages\SeoPagesResource;
 use Filament\Notifications\Notification;
-use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -75,27 +83,41 @@ class DashboardQuickLinks extends Widget
     protected function getViewData(): array
     {
         return [
-            'contentLinks' => [
-                [
-                    'label' => 'SEO Pages',
-                    'description' => 'Control page-specific metadata and social previews.',
-                    'icon' => Heroicon::OutlinedDocumentMagnifyingGlass,
-                    'manageUrl' => SeoPagesResource::getUrl(),
-                    'createUrl' => SeoPagesResource::getUrl('create'),
-                ],
+            'createLinks' => [
+                'New Project' => ProjectResource::getUrl('create'),
+                'New Blog Post' => BlogPostResource::getUrl('create'),
+                'New SEO Entry' => SeoPagesResource::getUrl('create'),
             ],
-            'settingsLinks' => [
-                [
-                    'label' => 'Global Settings',
-                    'description' => 'Logo, footer, site info, and default SEO fallbacks.',
-                    'icon' => Heroicon::OutlinedCog6Tooth,
-                    'url' => GlobalSettings::getUrl(),
+            'linkGroups' => [
+                'Content' => [
+                    'Projects' => ProjectResource::getUrl(),
+                    'Blog Posts' => BlogPostResource::getUrl(),
+                    'Blog Categories' => BlogCategoryResource::getUrl(),
+                    'Brands' => BrandResource::getUrl(),
+                    'FAQs' => FaqResource::getUrl(),
+                    'Events' => EventResource::getUrl(),
                 ],
-                [
-                    'label' => 'Marketing Settings',
-                    'description' => 'Tracking pixels, verification codes, and script injections.',
-                    'icon' => Heroicon::OutlinedLightBulb,
-                    'url' => MarketingSettings::getUrl(),
+                'Data Collection' => [
+                    'Contact Submissions' => ContactSubmissionResource::getUrl(),
+                    'Newsletter Subscriptions' => NewsletterSubscriptionResource::getUrl(),
+                ],
+                'Site Settings' => [
+                    'Global Settings' => GlobalSettings::getUrl(),
+                    'Marketing Settings' => MarketingSettings::getUrl(),
+                    'SEO Pages' => SeoPagesResource::getUrl(),
+                    'Contact Locations' => ContactLocationResource::getUrl(),
+                ],
+                'Public Pages' => [
+                    'About' => route('about'),
+                    'Our Clients' => route('clients'),
+                    'Services' => route('services'),
+                    'Events' => route('events'),
+                    'Projects' => route('projects'),
+                    'Blogs' => route('blogs'),
+                    'Contact' => route('contact'),
+                    'Privacy Policy' => route('privacy-policy'),
+                    'Terms of Service' => route('terms-of-service'),
+                    'Sitemap' => route('sitemap'),
                 ],
             ],
             'supportsDatabaseSessions' => $this->supportsDatabaseSessions(),

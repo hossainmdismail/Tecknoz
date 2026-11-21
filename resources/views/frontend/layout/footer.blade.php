@@ -10,6 +10,8 @@
     $contactShortcuts = collect(array_keys($shortcutIds))
         ->map(fn (string $type) => $linkedContacts->get($type)?->first())
         ->filter();
+    $newsletterEmail = old('newsletter_email');
+    $contactLocations ??= \App\Models\ContactLocation::query()->visible()->get();
 @endphp
 
   <footer class="footer" id="contact">
@@ -47,13 +49,20 @@
             </a>
           </div>
         </div>
-        <div class="footer-form w-form">
-          <div class="footer-form-container">
-            <div class="footer-form-block">
-              <input class="footer-form-field w-input" aria-label="Get product updates" placeholder="Enter your email" type="email" disabled>
-              <input type="button" class="footer-form-submit w-button" value="Subscribe" disabled>
-            </div>
-          </div>
+        <div class="footer-form" id="newsletter-form">
+          <form class="footer-form-block" method="post" action="{{ route('newsletter.store') }}">
+            @csrf
+            <input class="footer-form-field w-input" aria-label="Email address for product updates" placeholder="Enter your email"
+              type="email" name="newsletter_email" autocomplete="email" maxlength="255" required
+              value="{{ is_string($newsletterEmail) ? $newsletterEmail : '' }}" @error('newsletter_email', 'newsletter') aria-invalid="true" aria-describedby="newsletter-error" @enderror>
+            <input type="submit" class="footer-form-submit w-button" value="Subscribe">
+          </form>
+          @error('newsletter_email', 'newsletter')
+            <p id="newsletter-error" role="alert">{{ $message }}</p>
+          @enderror
+          @if (session('newsletter_subscribed'))
+            <p role="status">Thanks for subscribing.</p>
+          @endif
         </div>
         <div class="footer-two-content">
           <div class="footer-block-two">
@@ -94,22 +103,20 @@ function googleTranslateElementInit() {
           <div class="footer-block-two">
             <div class="footer-link-wraper">
               <div class="footer-title">Our Services</div>
-              <a data-wf--footer-links--variant="base" @include('frontend.layout.link-attributes', ['name' => 'services.show', 'parameters' => ['slug' => 'digital-marketing'], 'homeSection' => 'service-digital-marketing']) class="footer-link-two">Digital Marketing</a>
-              <a data-wf--footer-links--variant="base" @include('frontend.layout.link-attributes', ['name' => 'services.show', 'parameters' => ['slug' => 'design-development'], 'homeSection' => 'service-design-development']) class="footer-link-two">Design &amp; Development</a>
-              <a data-wf--footer-links--variant="base" @include('frontend.layout.link-attributes', ['name' => 'services.show', 'parameters' => ['slug' => 'recruitment'], 'homeSection' => 'service-recruitment']) class="footer-link-two">Recruitment</a>
-              <a data-wf--footer-links--variant="base" @include('frontend.layout.link-attributes', ['name' => 'services.show', 'parameters' => ['slug' => 'semiconductor'], 'homeSection' => 'service-semiconductor']) class="footer-link-two">Semiconductor</a>
-              <a data-wf--footer-links--variant="base" @include('frontend.layout.link-attributes', ['name' => 'services.show', 'parameters' => ['slug' => 'business'], 'homeSection' => 'service-business']) class="footer-link-two">Business</a>
-              <a data-wf--footer-links--variant="base" @include('frontend.layout.link-attributes', ['name' => 'services.show', 'parameters' => ['slug' => 'ai-automation'], 'homeSection' => 'service-ai-automation']) class="footer-link-two">AI Automation</a>
+              <a data-wf--footer-links--variant="base" href="{{ route('services.show', 'digital-marketing') }}" class="footer-link-two">Digital Marketing</a>
+              <a data-wf--footer-links--variant="base" href="{{ route('services.show', 'design-development') }}" class="footer-link-two">Design &amp; Development</a>
+              <a data-wf--footer-links--variant="base" href="{{ route('services.show', 'recruitment') }}" class="footer-link-two">Recruitment</a>
+              <a data-wf--footer-links--variant="base" href="{{ route('services.show', 'semiconductor') }}" class="footer-link-two">Semiconductor</a>
+              <a data-wf--footer-links--variant="base" href="{{ route('services.show', 'business') }}" class="footer-link-two">Business</a>
+              <a data-wf--footer-links--variant="base" href="{{ route('services.show', 'ai-automation') }}" class="footer-link-two">AI Automation</a>
             </div>
           </div>
           <div class="footer-block-two">
             <div class="footer-link-wraper">
               <div class="footer-title">Specialized industry</div>
-              <a data-wf--footer-links--variant="base" class="footer-link-two">Semiconductor Industry</a>
-              <a data-wf--footer-links--variant="base" class="footer-link-two">E-Commerce Industry</a>
-              <a data-wf--footer-links--variant="base" class="footer-link-two">Real Estate</a>
-              <a data-wf--footer-links--variant="base" class="footer-link-two">Edtech Industry</a>
-              <a data-wf--footer-links--variant="base" class="footer-link-two">Travel &amp; Hospitality</a>
+              @foreach (config('industries') as $industrySlug => $industry)
+                <a data-wf--footer-links--variant="base" href="{{ route('industries.show', $industrySlug) }}" class="footer-link-two">{{ $industry['name'] }}</a>
+              @endforeach
               <a href="https://gamma.app/docs/Tecknoz-zjcvvsxvusckrda" target="_blank" rel="noopener noreferrer" class="company-deck w-inline-block">
                 <div class="footer-link-two">Company Profile</div>
                 <div class="deck-icon w-embed"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewbox="0 0 24 24" fill="none">
@@ -121,15 +128,15 @@ function googleTranslateElementInit() {
           <div class="footer-block-two">
             <div class="footer-link-wraper">
               <div class="footer-title">Contact</div>
-              @foreach ($globalSettings?->contact_locations ?? [] as $location)
+              @foreach ($contactLocations as $location)
                 <div class="company-deck">
                   <div class="footer-contact-icon">
                     @include('frontend.layout.contact-icon', ['type' => 'location'])
                   </div>
-                  @if (filled($location['map_url'] ?? null))
-                    <a href="{{ $location['map_url'] }}" target="_blank" rel="noopener noreferrer" class="footer-link-two">{{ $location['label'] }}</a>
+                  @if ($mapLink = $location->mapLink())
+                    <a href="{{ $mapLink }}" target="_blank" rel="noopener noreferrer" class="footer-link-two">{{ $location->label }}</a>
                   @else
-                    <span class="footer-link-two">{{ $location['label'] }}</span>
+                    <span class="footer-link-two">{{ $location->label }}</span>
                   @endif
                 </div>
               @endforeach

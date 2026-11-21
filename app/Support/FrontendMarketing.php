@@ -9,10 +9,11 @@ class FrontendMarketing
     public function resolve(): array
     {
         $settings = $this->settings();
+        $gtmContainer = $settings?->gtm_container_id ?: config('tecknoz.gtm_container_id');
 
         return [
-            'gtm_enabled' => (bool) ($settings?->gtm_enabled && filled($settings?->gtm_container_id)),
-            'gtm_container_id' => $settings?->gtm_container_id,
+            'gtm_enabled' => (bool) ($settings?->gtm_enabled && filled($gtmContainer)),
+            'gtm_container_id' => $gtmContainer,
             'ga4_enabled' => (bool) ($settings?->ga4_enabled && filled($settings?->ga4_measurement_id)),
             'ga4_measurement_id' => $settings?->ga4_measurement_id,
             'meta_pixel_enabled' => (bool) ($settings?->meta_pixel_enabled && filled($settings?->meta_pixel_id)),

@@ -62,8 +62,8 @@ class MarketingSettings extends Page implements Forms\Contracts\HasForms
 
                                         Forms\Components\TextInput::make('gtm_container_id')
                                             ->label('GTM Container ID')
-                                            ->helperText('Example: GTM-XXXXXX')
-                                            ->placeholder('GTM-XXXXXX')
+                                            ->helperText('Leave blank to use the container configured for this site.')
+                                            ->placeholder(config('tecknoz.gtm_container_id') ?: 'GTM-XXXXXX')
                                             ->maxLength(255),
                                     ])
                                     ->columns(2),

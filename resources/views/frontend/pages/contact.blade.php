@@ -61,7 +61,6 @@
                 <div class="contact-info-text">Get access to a team of dedicated product specialists.</div>
               </div>
             </div>
-
           </div>
         </div>
         <div id="contact-form" class="form">
@@ -125,8 +124,11 @@
     </div>
   </section>
 
-  @php($contactLinks = $settings?->contactLinks() ?? collect())
-  @if ($settings?->contact_locations || $contactLinks->isNotEmpty() || $settings?->business_hours)
+  @php
+    $contactLinks = $settings?->contactLinks() ?? collect();
+    $offices = $contactLocations->filter(fn ($location) => $location->hasOfficeDetails());
+  @endphp
+  @if ($offices->isNotEmpty() || $contactLinks->isNotEmpty() || $settings?->business_hours)
     <section class="section top-0">
       <div class="w-layout-blockcontainer container w-container">
         <div class="contact-info-wrapper">
@@ -134,18 +136,14 @@
             <h2 data-w-id="7d26204c-5728-ff82-9657-319d9079f7ec" style="opacity:0" class="section-title">Find Us <span class="italic"><em>Here</em></span></h2>
           </div>
           <div class="info-cards">
-            @foreach ($settings?->contact_locations ?? [] as $location)
+            @foreach ($offices as $location)
               <div class="info-card">
                 <div class="info-text-wrap">
-                  <h3 class="info-card-title">{{ filled($location['office_name'] ?? null) ? $location['office_name'] : $location['label'] }}</h3>
-                  @if (filled($location['address'] ?? null))
-                    <p class="info-card-description contact-office-address">{{ $location['address'] }}</p>
-                  @elseif (filled($location['office_name'] ?? null))
-                    <p class="info-card-description">{{ $location['label'] }}</p>
-                  @endif
+                  <h3 class="info-card-title">{{ $location->office_name ?: $location->label }}</h3>
+                  <p class="info-card-description contact-office-address">{{ $location->address ?: $location->label }}</p>
                 </div>
-                @if (Str::startsWith($location['map_url'] ?? '', ['https://', 'http://']))
-                  <a href="{{ $location['map_url'] }}" target="_blank" rel="noopener noreferrer" class="info-card-link">View Map</a>
+                @if ($mapLink = $location->directionsLink())
+                  <a href="{{ $mapLink }}" target="_blank" rel="noopener noreferrer" class="info-card-link">View Map</a>
                 @endif
               </div>
             @endforeach

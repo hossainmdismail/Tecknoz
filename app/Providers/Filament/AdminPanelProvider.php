@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\Widgets\AccountOverviewWidget;
 use App\Filament\Widgets\ContentCollectionsOverview;
 use App\Filament\Widgets\DashboardQuickLinks;
+use App\Filament\Widgets\DataCollectionOverview;
 use App\Filament\Widgets\VisitWebsiteWidget;
 use App\Support\FrontendSeo;
 use Filament\Auth\Pages\EditProfile;
@@ -46,6 +47,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->widgets([
                 VisitWebsiteWidget::class,
+                DataCollectionOverview::class,
                 ContentCollectionsOverview::class,
                 DashboardQuickLinks::class,
                 AccountOverviewWidget::class,

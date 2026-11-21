@@ -66,7 +66,24 @@
   </section>
   <section class="section">
     <div class="w-layout-blockcontainer container w-container">
-      <p class="section-subtitle">No events to show yet.</p>
+      <div class="info-cards">
+        @forelse ($events as $event)
+          <article class="info-card">
+            <div class="info-text-wrap">
+              @if ($event->date_label)
+                <p class="info-card-description">{{ $event->date_label }}</p>
+              @endif
+              <h2 class="info-card-title">{{ $event->title }}</h2>
+              <p class="info-card-description">{{ $event->summary }}</p>
+            </div>
+            @if (Str::startsWith((string) $event->url, ['https://', 'http://']))
+              <a class="info-card-link" href="{{ $event->url }}">Event details</a>
+            @endif
+          </article>
+        @empty
+          <p class="section-subtitle">No events to show yet.</p>
+        @endforelse
+      </div>
     </div>
   </section>
 @endsection

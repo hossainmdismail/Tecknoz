@@ -19,16 +19,22 @@ SQLite is the default for local development. To use MySQL, create an empty datab
 - **Global Settings** manages branding, contact details, social links, footer copy, default metadata, social previews, the canonical base URL, and fallback robots directives.
 - **SEO Pages** manages per-page metadata, Open Graph, canonical overrides, robots directives, and JSON-LD through a unique page key.
 - **Marketing Settings** manages Google Tag Manager, GA4, Meta Pixel, TikTok Pixel, webmaster verification, and trusted admin-managed snippets for the head, body start, and body end.
-- **Dashboard** includes Visit Website, Account Overview, Content Overview, and Quick Actions with active session controls. Session controls use the database session driver.
+- **Dashboard** shows content and form submission counts and gives quick access to CMS resources, site settings, and public pages. It also includes Visit Website, Account Overview, and active session controls for the database session driver.
 - **Content** includes Brands, Projects, Blog Posts, Blog Categories, and FAQs. Seed data initializes the settings records, and the FAQ migration imports the original theme questions.
 
 ## Frontend theme
 
-Public pages include the Webflow homepage, About, Our Clients, Services, Events, Projects, and Blogs. Find their views in `resources/views/frontend/pages/`, the default layout, header, footer and CTA under `resources/views/frontend/layout/`, and the exported assets under `public/frontend/`.
+Public pages include the Webflow homepage, About, Our Clients, Services, industry pages, Events, Projects, Blogs, Contact, Privacy Policy, and Terms of Service. Find their views in `resources/views/frontend/pages/`, the shared layout partials under `resources/views/frontend/layout/`, and the exported assets under `public/frontend/`.
+
+Manage Events at `/admin/events`. The sitemap at `/sitemap.xml` follows the canonical base and the current publication and indexing settings. See the [cutover notes](docs/ai/PROJECT_CONTEXT.md#production-cutover) before pointing the production domain to Laravel.
 
 Manage brand logos in `/admin/brands`. Enabled images appear in the homepage ticker and the Clients logo grid. To import the original theme logos into a fresh database, run `php artisan db:seed --class=BrandSeeder`.
 
 The [project context guide](docs/ai/PROJECT_CONTEXT.md) lists all public routes, SEO keys, CMS modules, and theme integration details.
+
+Contact form submissions are saved in the database. Manage the inbox and download filtered or selected CSV rows at `/admin/contact-submissions`.
+
+Manage office addresses and footer location labels under **Settings → Contact Locations** at `/admin/contact-locations`. Edit phone, email, and business hours under **Global Settings → Contact**.
 
 ## Add another theme page
 
@@ -47,7 +53,7 @@ Extend `frontend.layout.default` from each theme view, and set a unique SEO key 
 
 The layout loads SEO and marketing settings, renders the head tags and scripts, and provides `styles` and `scripts` stacks for theme assets. Set page-level Blade defaults with `title`, `description`, `og_title`, `og_description`, `og_image`, `twitter_title`, `twitter_description`, and `twitter_image` sections as needed. Active SEO records take precedence for the page fields they supply, followed by the corresponding global defaults. The home view shows how to read global branding from `FrontendSeo::globalSettings()`.
 
-The homepage uses the exported CSS and scripts directly. The footer newsletter is display-only until a subscription flow is added. Keep the public route named `home` for the dashboard's Visit Website link. The optional Vite scaffold is available when a theme needs bundled assets. Run `npm install` and `npm run dev` after adding the `@vite` directive to the theme layout.
+The homepage uses the exported CSS and scripts directly. The shared footer saves newsletter subscribers to the database. Find **Newsletter Subscriptions** and **Contact Submissions** under **Data Collection** in Filament. Keep the public route named `home` for the dashboard's Visit Website link. The optional Vite scaffold is available when a theme needs bundled assets. Run `npm install` and `npm run dev` after adding the `@vite` directive to the theme layout.
 
 ## Verification
 
